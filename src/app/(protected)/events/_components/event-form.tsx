@@ -18,6 +18,9 @@ function toDateTimeLocal(isoDate: string): string {
 export interface EventFormDefaults {
   name: string;
   description: string;
+  location: string;
+  profileImageUrl: string;
+  coverImageUrl: string;
   startDate: string;
   endDate: string;
   capacity: number;
@@ -29,6 +32,10 @@ interface EventFormProps {
   onSubmit: (values: {
     name: string;
     description?: string;
+    location?: string;
+    profileImageUrl?: string;
+    coverImageUrl?: string;
+    pass?: string;
     startDate: string;
     endDate: string;
     capacity: number;
@@ -52,6 +59,9 @@ export function EventForm({
       ? {
         name: defaultValues.name,
         description: defaultValues.description,
+        location: defaultValues.location,
+        profileImageUrl: defaultValues.profileImageUrl,
+        coverImageUrl: defaultValues.coverImageUrl,
         startDate: toDateTimeLocal(defaultValues.startDate),
         endDate: toDateTimeLocal(defaultValues.endDate),
         capacity: defaultValues.capacity,
@@ -63,6 +73,10 @@ export function EventForm({
     onSubmit({
       name: values.name,
       description: values.description,
+      location: values.location,
+      profileImageUrl: values.profileImageUrl,
+      coverImageUrl: values.coverImageUrl,
+      pass: values.pass,
       startDate: new Date(values.startDate).toISOString(),
       endDate: new Date(values.endDate).toISOString(),
       capacity: values.capacity,
@@ -86,6 +100,35 @@ export function EventForm({
         placeholder="A short description for attendees"
         error={errors.description?.message}
         {...register('description')}
+      />
+      <Input
+        label="Location"
+        hasOptionalLabel
+        placeholder="Moscone Center, San Francisco"
+        error={errors.location?.message}
+        {...register('location')}
+      />
+      <Input
+        label="Profile image URL"
+        hasOptionalLabel
+        placeholder="https://cdn.example.com/profile.png"
+        error={errors.profileImageUrl?.message}
+        {...register('profileImageUrl')}
+      />
+      <Input
+        label="Cover image URL"
+        hasOptionalLabel
+        placeholder="https://cdn.example.com/cover.png"
+        error={errors.coverImageUrl?.message}
+        {...register('coverImageUrl')}
+      />
+      <Input
+        type="password"
+        label="Access pass"
+        hasOptionalLabel
+        placeholder="Leave blank for open registration"
+        error={errors.pass?.message}
+        {...register('pass')}
       />
       <Input
         type="datetime-local"

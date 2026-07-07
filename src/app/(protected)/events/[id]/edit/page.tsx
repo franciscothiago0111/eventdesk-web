@@ -34,6 +34,9 @@ export default function EditEventPage() {
             defaultValues={{
               name: event.name,
               description: event.description ?? '',
+              location: event.location ?? '',
+              profileImageUrl: event.profileImageUrl ?? '',
+              coverImageUrl: event.coverImageUrl ?? '',
               startDate: event.startDate,
               endDate: event.endDate,
               capacity: event.capacity,

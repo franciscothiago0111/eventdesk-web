@@ -5,6 +5,10 @@ import { Pagination } from '@/shared/types/pagination';
 export interface EventPayload {
   name: string;
   description?: string;
+  location?: string;
+  profileImageUrl?: string;
+  coverImageUrl?: string;
+  pass?: string;
   startDate: string;
   endDate: string;
   capacity: number;
