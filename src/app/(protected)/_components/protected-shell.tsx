@@ -1,15 +1,20 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { cn } from '@/lib/utils';
 import { useAuth } from '@/core/hooks/use-auth';
 import { SocketProvider } from '@/core/realtime/socket-provider';
+import { useSidebarState } from '../_hooks/use-sidebar-state';
+import { DashboardLoadingState } from './dashboard-loading-state';
+import { Navbar } from './navbar';
+import { Sidebar } from './sidebar';
 
 export function ProtectedShell({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const user = useAuth((state) => state.user);
   const logout = useAuth((state) => state.logout);
+  const { isSidebarOpen, toggleSidebar, closeSidebarOnMobile } = useSidebarState();
   // useAuth.persist reads localStorage, which doesn't exist during SSR —
   // guard against it being unavailable on the server render pass.
   const [hasHydrated, setHasHydrated] = useState(
@@ -33,34 +38,40 @@ export function ProtectedShell({ children }: { children: React.ReactNode }) {
     }
   }, [hasHydrated, router]);
 
+  const handleLogout = () => {
+    logout();
+    router.replace('/login');
+  };
+
   if (!hasHydrated || !user) {
-    return null;
+    return <DashboardLoadingState />;
   }
 
   return (
     <SocketProvider>
-      <div className="flex min-h-screen flex-col">
-        <nav className="flex items-center justify-between border-b border-neutral-200 px-8 py-4">
-          <div className="flex items-center gap-6">
-            <span className="text-sm font-bold text-neutral-950">eventdesk</span>
-            <Link href="/dashboard" className="text-sm text-neutral-700 hover:text-primary-main">
-              Dashboard
-            </Link>
-            <Link href="/events" className="text-sm text-neutral-700 hover:text-primary-main">
-              Events
-            </Link>
-          </div>
-          <button
-            onClick={() => {
-              logout();
-              router.replace('/login');
-            }}
-            className="text-sm text-neutral-700 hover:text-primary-main"
+      <div className="min-h-screen overflow-x-hidden bg-neutral-white">
+        <div className="flex min-h-screen">
+          <Sidebar
+            user={user}
+            isSidebarOpen={isSidebarOpen}
+            onToggleSidebar={toggleSidebar}
+            onLinkClick={closeSidebarOnMobile}
+            onLogout={handleLogout}
+          />
+
+          <div
+            className={cn(
+              'flex min-h-screen min-w-0 flex-1 flex-col transition-all duration-300',
+              isSidebarOpen ? 'md:pl-52 lg:pl-63' : 'md:pl-16 lg:pl-18',
+            )}
           >
-            Sign out
-          </button>
-        </nav>
-        <div className="flex-1">{children}</div>
+            <Navbar user={user} onLogout={handleLogout} />
+
+            <main className="flex-1 px-4 py-4 md:px-4 md:py-4 xl:px-6 xl:py-6">
+              {children}
+            </main>
+          </div>
+        </div>
       </div>
     </SocketProvider>
   );

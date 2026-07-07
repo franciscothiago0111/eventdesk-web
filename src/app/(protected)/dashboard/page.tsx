@@ -12,9 +12,9 @@ import { CheckInTrendChart } from './_components/check-in-trend-chart';
 
 export default function DashboardPage() {
   const user = useAuth((state) => state.user);
-  const { data: events, isLoading, isError } = useEvents();
+  const { data: events, isLoading, isError } = useEvents({ limit: 100 });
 
-  const activeEvent = events?.find((event) => event.status === 'PUBLISHED');
+  const activeEvent = events?.data.find((event) => event.status === 'PUBLISHED');
   const liveCheckIns = useLiveCheckIns(activeEvent?.id);
 
   return (
@@ -31,7 +31,7 @@ export default function DashboardPage() {
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             <Card title="Total events" padding="lg">
               <p className="text-3xl font-bold text-neutral-950">
-                {events?.length ?? 0}
+                {events?.total ?? 0}
               </p>
             </Card>
 

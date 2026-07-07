@@ -1,9 +1,5 @@
 'use client';
 
-import { useParams } from 'next/navigation';
-import { PageHeader } from '@/components/PageHeader';
-import { PageHeaderGroup } from '@/components/PageHeaderGroup';
-import { BackButton } from '@/components/BackButton';
 import { CSVDownloadButton } from '@/components/CSVDownloadButton';
 import { LoadingState } from '@/components/LoadingState';
 import { ErrorState } from '@/components/ErrorState';
@@ -21,13 +17,16 @@ import {
 } from '@/components/ui/Table';
 import { useCSVDownload } from '@/core/hooks/use-csv-download';
 import { useLiveCheckIns } from '@/core/realtime/use-live-checkins';
-import { useRegistrations } from './_hooks/use-registrations';
-import { CheckInBadge } from './_components/check-in-badge';
+import { useRegistrations } from '../_hooks/use-registrations';
+import { CheckInBadge } from './check-in-badge';
 
-export default function RegistrationsPage() {
-  const { id } = useParams<{ id: string }>();
-  const { data: registrations, isLoading, isError } = useRegistrations(id);
-  const liveCheckIns = useLiveCheckIns(id);
+interface RegistrationsSectionProps {
+  eventId: string;
+}
+
+export function RegistrationsSection({ eventId }: RegistrationsSectionProps) {
+  const { data: registrations, isLoading, isError } = useRegistrations(eventId);
+  const liveCheckIns = useLiveCheckIns(eventId);
   const downloadCSV = useCSVDownload<{
     name: string;
     email: string;
@@ -36,28 +35,25 @@ export default function RegistrationsPage() {
   }>();
 
   return (
-    <div className="flex flex-col gap-6 p-8">
-      <PageHeaderGroup>
-        <PageHeader title="Registrations" subtitle="Attendees for this event" />
-        <div className="flex gap-3">
-          <CSVDownloadButton
-            label="Export CSV"
-            disabled={!registrations || registrations.length === 0}
-            onClick={() =>
-              downloadCSV(
-                (registrations ?? []).map((registration) => ({
-                  name: registration.attendeeName,
-                  email: registration.attendeeEmail,
-                  status: registration.status,
-                  checkInCode: registration.checkInCode,
-                })),
-                'registrations.csv',
-              )
-            }
-          />
-          <BackButton text="Back" />
-        </div>
-      </PageHeaderGroup>
+    <div className="flex flex-col gap-4">
+      <div className="flex items-center justify-between">
+        <h2 className="text-lg font-semibold text-neutral-950">Registrations</h2>
+        <CSVDownloadButton
+          label="Export CSV"
+          disabled={!registrations || registrations.length === 0}
+          onClick={() =>
+            downloadCSV(
+              (registrations ?? []).map((registration) => ({
+                name: registration.attendeeName,
+                email: registration.attendeeEmail,
+                status: registration.status,
+                checkInCode: registration.checkInCode,
+              })),
+              'registrations.csv',
+            )
+          }
+        />
+      </div>
 
       <LoadingState isLoading={isLoading}>
         {isError ? (

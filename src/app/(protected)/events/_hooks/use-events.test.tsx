@@ -22,13 +22,21 @@ const event: Event = {
 };
 
 describe('useEvents', () => {
-  it('returns the unwrapped list of events', async () => {
+  it('returns the unwrapped paginated list of events', async () => {
+    const payload = {
+      data: [event],
+      total: 1,
+      currentPage: 1,
+      perPage: 10,
+      limit: 10,
+    };
+
     server.use(
       http.get(`${apiUrl}/events`, () =>
         HttpResponse.json({
           success: true,
           message: 'Events found',
-          payload: [event],
+          payload,
         }),
       ),
     );
@@ -39,7 +47,7 @@ describe('useEvents', () => {
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
 
-    expect(result.current.data).toEqual([event]);
+    expect(result.current.data).toEqual(payload);
   });
 
   it('surfaces an error state when the request fails', async () => {

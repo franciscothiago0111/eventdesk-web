@@ -11,6 +11,7 @@ import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { useCloseEvent, useEvent, usePublishEvent } from '../_hooks/use-events';
 import { EventStatus } from '@/shared/types/event';
+import { RegistrationsSection } from './_components/registrations-section';
 
 const statusVariant: Record<EventStatus, string> = {
   DRAFT: 'default',
@@ -38,74 +39,72 @@ export default function EventDetailPage() {
         {isError || !event ? (
           <ErrorState message="Could not load this event." />
         ) : (
-          <div className="flex flex-col gap-6 max-w-2xl">
-            <div className="flex items-center gap-3">
-              <Badge variant={statusVariant[event.status]}>
-                {event.status}
-              </Badge>
-              <span className="text-sm text-neutral-600">
-                {event.registered} / {event.capacity} registered
-              </span>
+          <div className="flex flex-col gap-6">
+            <div className="flex flex-col gap-6 max-w-2xl">
+              <div className="flex items-center gap-3">
+                <Badge variant={statusVariant[event.status]}>
+                  {event.status}
+                </Badge>
+                <span className="text-sm text-neutral-600">
+                  {event.registered} / {event.capacity} registered
+                </span>
+              </div>
+
+              {event.description && (
+                <p className="text-sm text-neutral-700">{event.description}</p>
+              )}
+
+              <dl className="grid grid-cols-2 gap-4 text-sm">
+                <div>
+                  <dt className="text-neutral-500">Starts</dt>
+                  <dd>{new Date(event.startDate).toLocaleString()}</dd>
+                </div>
+                <div>
+                  <dt className="text-neutral-500">Ends</dt>
+                  <dd>{new Date(event.endDate).toLocaleString()}</dd>
+                </div>
+              </dl>
+
+              <div className="flex flex-wrap gap-3">
+                {event.status === 'DRAFT' && (
+                  <Button
+                    variant="secondary"
+                    onClick={() => router.push(`/events/${event.id}/edit`)}
+                  >
+                    Edit
+                  </Button>
+                )}
+                {event.status === 'DRAFT' && (
+                  <Button
+                    isLoading={publishEvent.isPending}
+                    onClick={() =>
+                      publishEvent.mutate(undefined, {
+                        onSuccess: () => toast.success('Event published'),
+                        onError: () => toast.error('Could not publish the event'),
+                      })
+                    }
+                  >
+                    Publish
+                  </Button>
+                )}
+                {event.status === 'PUBLISHED' && (
+                  <Button
+                    variant="danger"
+                    isLoading={closeEvent.isPending}
+                    onClick={() =>
+                      closeEvent.mutate(undefined, {
+                        onSuccess: () => toast.success('Event closed'),
+                        onError: () => toast.error('Could not close the event'),
+                      })
+                    }
+                  >
+                    Close
+                  </Button>
+                )}
+              </div>
             </div>
 
-            {event.description && (
-              <p className="text-sm text-neutral-700">{event.description}</p>
-            )}
-
-            <dl className="grid grid-cols-2 gap-4 text-sm">
-              <div>
-                <dt className="text-neutral-500">Starts</dt>
-                <dd>{new Date(event.startDate).toLocaleString()}</dd>
-              </div>
-              <div>
-                <dt className="text-neutral-500">Ends</dt>
-                <dd>{new Date(event.endDate).toLocaleString()}</dd>
-              </div>
-            </dl>
-
-            <div className="flex flex-wrap gap-3">
-              {event.status === 'DRAFT' && (
-                <Button
-                  variant="secondary"
-                  onClick={() => router.push(`/events/${event.id}/edit`)}
-                >
-                  Edit
-                </Button>
-              )}
-              {event.status === 'DRAFT' && (
-                <Button
-                  isLoading={publishEvent.isPending}
-                  onClick={() =>
-                    publishEvent.mutate(undefined, {
-                      onSuccess: () => toast.success('Event published'),
-                      onError: () => toast.error('Could not publish the event'),
-                    })
-                  }
-                >
-                  Publish
-                </Button>
-              )}
-              {event.status === 'PUBLISHED' && (
-                <Button
-                  variant="danger"
-                  isLoading={closeEvent.isPending}
-                  onClick={() =>
-                    closeEvent.mutate(undefined, {
-                      onSuccess: () => toast.success('Event closed'),
-                      onError: () => toast.error('Could not close the event'),
-                    })
-                  }
-                >
-                  Close
-                </Button>
-              )}
-              <Button
-                variant="ghost"
-                onClick={() => router.push(`/events/${event.id}/registrations`)}
-              >
-                View registrations
-              </Button>
-            </div>
+            <RegistrationsSection eventId={event.id} />
           </div>
         )}
       </LoadingState>

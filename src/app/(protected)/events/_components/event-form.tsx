@@ -50,12 +50,12 @@ export function EventForm({
     resolver: zodResolver(eventFormSchema),
     defaultValues: defaultValues
       ? {
-          name: defaultValues.name,
-          description: defaultValues.description,
-          startDate: toDateTimeLocal(defaultValues.startDate),
-          endDate: toDateTimeLocal(defaultValues.endDate),
-          capacity: defaultValues.capacity,
-        }
+        name: defaultValues.name,
+        description: defaultValues.description,
+        startDate: toDateTimeLocal(defaultValues.startDate),
+        endDate: toDateTimeLocal(defaultValues.endDate),
+        capacity: defaultValues.capacity,
+      }
       : undefined,
   });
 
@@ -72,7 +72,7 @@ export function EventForm({
   return (
     <form
       onSubmit={handleSubmit(submit)}
-      className="flex flex-col gap-4 w-full max-w-lg"
+      className="flex flex-col gap-4 w-full"
     >
       <Input
         label="Name"

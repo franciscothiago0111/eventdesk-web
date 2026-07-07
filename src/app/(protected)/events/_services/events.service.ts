@@ -1,5 +1,6 @@
 import { api } from '@/core/api/client';
-import { Event } from '@/shared/types/event';
+import { Event, EventStatus } from '@/shared/types/event';
+import { Pagination } from '@/shared/types/pagination';
 
 export interface EventPayload {
   name: string;
@@ -9,8 +10,16 @@ export interface EventPayload {
   capacity: number;
 }
 
+export interface EventListParams {
+  name?: string;
+  status?: EventStatus;
+  page?: number;
+  limit?: number;
+}
+
 export const eventsService = {
-  list: () => api.get<Event[]>('/events'),
+  list: (params: EventListParams = {}) =>
+    api.get<Pagination<Event>>('/events', { ...params }),
   findById: (id: string) => api.get<Event>(`/events/${id}`),
   create: (payload: EventPayload) => api.post<Event>('/events', payload),
   update: (id: string, payload: EventPayload) =>

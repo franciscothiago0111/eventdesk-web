@@ -1,11 +1,18 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { eventsService, EventPayload } from '../_services/events.service';
+import {
+  eventsService,
+  EventListParams,
+  EventPayload,
+} from '../_services/events.service';
 
 const eventsKey = ['events'] as const;
 const eventKey = (id: string) => ['events', id] as const;
 
-export function useEvents() {
-  return useQuery({ queryKey: eventsKey, queryFn: eventsService.list });
+export function useEvents(params: EventListParams = {}) {
+  return useQuery({
+    queryKey: [...eventsKey, params] as const,
+    queryFn: () => eventsService.list(params),
+  });
 }
 
 export function useEvent(id: string) {
