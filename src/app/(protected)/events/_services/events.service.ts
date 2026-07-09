@@ -1,13 +1,12 @@
 import { api } from '@/core/api/client';
-import { Event, EventStatus } from '@/shared/types/event';
+import { Event, EventCategory, EventStatus } from '@/shared/types/event';
 import { Pagination } from '@/shared/types/pagination';
 
 export interface EventPayload {
   name: string;
   description?: string;
   location?: string;
-  profileImageUrl?: string;
-  coverImageUrl?: string;
+  category: EventCategory;
   pass?: string;
   startDate: string;
   endDate: string;

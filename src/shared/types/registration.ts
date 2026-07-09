@@ -8,3 +8,12 @@ export interface Registration {
   checkInCode: string;
   status: RegistrationStatus;
 }
+
+// Payload emitted by the `registration.confirmed` socket event when a guest
+// confirms via the public registration page.
+export interface RegistrationConfirmedEvent {
+  registrationId: string;
+  eventId: string;
+  attendeeName: string;
+  attendeeEmail: string;
+}

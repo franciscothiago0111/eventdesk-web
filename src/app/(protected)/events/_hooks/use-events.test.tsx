@@ -15,14 +15,15 @@ const event: Event = {
   name: 'Conference',
   description: 'A great conference',
   location: null,
-  profileImageUrl: null,
-  coverImageUrl: null,
+  category: 'OTHER',
   hasPass: false,
   startDate: '2026-08-01T09:00:00.000Z',
   endDate: '2026-08-02T09:00:00.000Z',
   capacity: 100,
   registered: 0,
   status: 'DRAFT',
+  images: [],
+  schedule: [],
 };
 
 describe('useEvents', () => {
@@ -77,6 +78,7 @@ describe('useCreateEvent', () => {
     const payload: EventPayload = {
       name: event.name,
       description: event.description ?? undefined,
+      category: event.category,
       startDate: event.startDate,
       endDate: event.endDate,
       capacity: event.capacity,

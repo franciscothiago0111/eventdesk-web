@@ -5,6 +5,9 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
+import { Select } from '@/components/ui/Select';
+import { EventCategory } from '@/shared/types/event';
+import { eventCategoryOptions } from '@/shared/utils/event-category';
 import { eventFormSchema, EventFormValues } from '../_schemas/event.schema';
 
 type EventFormInput = z.input<typeof eventFormSchema>;
@@ -19,8 +22,7 @@ export interface EventFormDefaults {
   name: string;
   description: string;
   location: string;
-  profileImageUrl: string;
-  coverImageUrl: string;
+  category: EventCategory;
   startDate: string;
   endDate: string;
   capacity: number;
@@ -33,8 +35,7 @@ interface EventFormProps {
     name: string;
     description?: string;
     location?: string;
-    profileImageUrl?: string;
-    coverImageUrl?: string;
+    category: EventCategory;
     pass?: string;
     startDate: string;
     endDate: string;
@@ -60,13 +61,12 @@ export function EventForm({
         name: defaultValues.name,
         description: defaultValues.description,
         location: defaultValues.location,
-        profileImageUrl: defaultValues.profileImageUrl,
-        coverImageUrl: defaultValues.coverImageUrl,
+        category: defaultValues.category,
         startDate: toDateTimeLocal(defaultValues.startDate),
         endDate: toDateTimeLocal(defaultValues.endDate),
         capacity: defaultValues.capacity,
       }
-      : undefined,
+      : { category: 'OTHER' },
   });
 
   const submit = (values: EventFormValues) => {
@@ -74,8 +74,7 @@ export function EventForm({
       name: values.name,
       description: values.description,
       location: values.location,
-      profileImageUrl: values.profileImageUrl,
-      coverImageUrl: values.coverImageUrl,
+      category: values.category,
       pass: values.pass,
       startDate: new Date(values.startDate).toISOString(),
       endDate: new Date(values.endDate).toISOString(),
@@ -108,19 +107,12 @@ export function EventForm({
         error={errors.location?.message}
         {...register('location')}
       />
-      <Input
-        label="Profile image URL"
-        hasOptionalLabel
-        placeholder="https://cdn.example.com/profile.png"
-        error={errors.profileImageUrl?.message}
-        {...register('profileImageUrl')}
-      />
-      <Input
-        label="Cover image URL"
-        hasOptionalLabel
-        placeholder="https://cdn.example.com/cover.png"
-        error={errors.coverImageUrl?.message}
-        {...register('coverImageUrl')}
+      <Select
+        label="Category"
+        options={eventCategoryOptions}
+        isPlaceholderDisabled
+        error={errors.category?.message}
+        {...register('category')}
       />
       <Input
         type="password"

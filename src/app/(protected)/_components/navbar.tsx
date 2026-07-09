@@ -6,6 +6,7 @@ import { usePathname } from 'next/navigation';
 import { LogOut, MenuIcon, X } from 'lucide-react';
 import type { AuthUser } from '@/core/services/auth.service';
 import { sidebarLinks } from './sidebar-config';
+import { NotificationBell } from './notification-bell';
 
 interface NavbarProps {
   user: AuthUser;
@@ -52,6 +53,8 @@ export function Navbar({ user, onLogout }: NavbarProps) {
           >
             <MenuIcon className="h-6 w-6" />
           </button>
+
+          <NotificationBell />
 
           <div className="hidden md:flex items-center gap-3">
             <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary-main">

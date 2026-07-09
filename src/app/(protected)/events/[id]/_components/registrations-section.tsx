@@ -17,6 +17,7 @@ import {
 } from '@/components/ui/Table';
 import { useCSVDownload } from '@/core/hooks/use-csv-download';
 import { useLiveCheckIns } from '@/core/realtime/use-live-checkins';
+import { useLiveRegistrations } from '@/core/realtime/use-live-registrations';
 import { useRegistrations } from '../_hooks/use-registrations';
 import { CheckInBadge } from './check-in-badge';
 
@@ -27,6 +28,7 @@ interface RegistrationsSectionProps {
 export function RegistrationsSection({ eventId }: RegistrationsSectionProps) {
   const { data: registrations, isLoading, isError } = useRegistrations(eventId);
   const liveCheckIns = useLiveCheckIns(eventId);
+  useLiveRegistrations(eventId);
   const downloadCSV = useCSVDownload<{
     name: string;
     email: string;

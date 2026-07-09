@@ -9,6 +9,8 @@ import { LoadingState } from '@/components/LoadingState';
 import { ErrorState } from '@/components/ErrorState';
 import { EventForm } from '../../_components/event-form';
 import { useEvent, useUpdateEvent } from '../../_hooks/use-events';
+import { ImagesSection } from '../_components/images-section';
+import { ScheduleSection } from '../_components/schedule-section';
 
 export default function EditEventPage() {
   const { id } = useParams<{ id: string }>();
@@ -28,29 +30,33 @@ export default function EditEventPage() {
         {isError || !event ? (
           <ErrorState message="Could not load this event." />
         ) : (
-          <EventForm
-            submitLabel="Save changes"
-            isSubmitting={updateEvent.isPending}
-            defaultValues={{
-              name: event.name,
-              description: event.description ?? '',
-              location: event.location ?? '',
-              profileImageUrl: event.profileImageUrl ?? '',
-              coverImageUrl: event.coverImageUrl ?? '',
-              startDate: event.startDate,
-              endDate: event.endDate,
-              capacity: event.capacity,
-            }}
-            onSubmit={(values) => {
-              updateEvent.mutate(values, {
-                onSuccess: () => {
-                  toast.success('Event updated');
-                  router.push(`/events/${id}`);
-                },
-                onError: () => toast.error('Could not update the event'),
-              });
-            }}
-          />
+          <div className="flex flex-col gap-10">
+            <EventForm
+              submitLabel="Save changes"
+              isSubmitting={updateEvent.isPending}
+              defaultValues={{
+                name: event.name,
+                description: event.description ?? '',
+                location: event.location ?? '',
+                category: event.category,
+                startDate: event.startDate,
+                endDate: event.endDate,
+                capacity: event.capacity,
+              }}
+              onSubmit={(values) => {
+                updateEvent.mutate(values, {
+                  onSuccess: () => {
+                    toast.success('Event updated');
+                    router.push(`/events/${id}`);
+                  },
+                  onError: () => toast.error('Could not update the event'),
+                });
+              }}
+            />
+
+            <ImagesSection eventId={id} images={event.images} />
+            <ScheduleSection eventId={id} schedule={event.schedule} />
+          </div>
         )}
       </LoadingState>
     </div>

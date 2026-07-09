@@ -3,9 +3,12 @@
 import { useParams } from 'next/navigation';
 import { useState } from 'react';
 import { Card } from '@/components/ui/Card';
+import { Badge } from '@/components/ui/Badge';
 import { LoadingState } from '@/components/LoadingState';
 import { ErrorState } from '@/components/ErrorState';
 import { Registration } from '@/shared/types/registration';
+import { getGalleryImages, getImageByType } from '@/shared/utils/event-images';
+import { eventCategoryLabel } from '@/shared/utils/event-category';
 import { usePublicEvent } from './_hooks/use-public-event';
 import { PublicRegistrationForm } from './_components/public-registration-form';
 
@@ -32,25 +35,36 @@ export default function PublicEventPage() {
           />
         ) : (
           <div className="flex flex-col gap-6">
-            {event.coverImageUrl && (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={event.coverImageUrl}
-                alt=""
-                className="h-48 w-full rounded-2xl object-cover"
-              />
-            )}
+            {(() => {
+              const coverImage = getImageByType(event.images, 'COVER');
+              return (
+                coverImage && (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={coverImage.url}
+                    alt=""
+                    className="h-48 w-full rounded-2xl object-cover"
+                  />
+                )
+              );
+            })()}
             <div className="flex items-center gap-4">
-              {event.profileImageUrl && (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={event.profileImageUrl}
-                  alt=""
-                  className="h-16 w-16 rounded-full object-cover"
-                />
-              )}
+              {(() => {
+                const profileImage = getImageByType(event.images, 'PROFILE');
+                return (
+                  profileImage && (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={profileImage.url}
+                      alt=""
+                      className="h-16 w-16 rounded-full object-cover"
+                    />
+                  )
+                );
+              })()}
               <div>
-                <h1 className="text-2xl font-semibold">{event.name}</h1>
+                <Badge variant="info">{eventCategoryLabel(event.category)}</Badge>
+                <h1 className="mt-1 text-2xl font-semibold">{event.name}</h1>
                 <p className="text-sm text-slate-500">
                   {formatDateRange(event.startDate, event.endDate)}
                 </p>
@@ -68,6 +82,47 @@ export default function PublicEventPage() {
               {event.capacity - event.registered} of {event.capacity} spots
               left
             </p>
+
+            {event.schedule.length > 0 && (
+              <div className="flex flex-col gap-2">
+                <h2 className="text-lg font-semibold text-slate-900">Schedule</h2>
+                <ul className="flex flex-col gap-2">
+                  {event.schedule.map((item) => (
+                    <li
+                      key={item.id}
+                      className="rounded-xl border border-slate-200 p-3"
+                    >
+                      <p className="font-medium text-slate-900">{item.title}</p>
+                      <p className="text-sm text-slate-500">
+                        {formatDateRange(item.startTime, item.endTime)}
+                      </p>
+                      {item.description && (
+                        <p className="mt-1 text-sm text-slate-700">
+                          {item.description}
+                        </p>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            {getGalleryImages(event.images).length > 0 && (
+              <div className="flex flex-col gap-2">
+                <h2 className="text-lg font-semibold text-slate-900">Gallery</h2>
+                <div className="grid grid-cols-3 gap-2 sm:grid-cols-4">
+                  {getGalleryImages(event.images).map((image) => (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      key={image.id}
+                      src={image.url}
+                      alt={image.caption ?? ''}
+                      className="aspect-square w-full rounded-lg object-cover"
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
 
             <Card title={registration ? 'You are registered!' : 'Register'}>
               {registration ? (

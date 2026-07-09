@@ -3,6 +3,7 @@
 import { createContext, useContext, useState } from 'react';
 import { io, Socket } from 'socket.io-client';
 import { env } from '../config/env';
+import { getStoredToken } from '../services/token-storage';
 
 const SocketContext = createContext<Socket | null>(null);
 
@@ -16,7 +17,12 @@ let socket: Socket | null = null;
 
 function getSocket(): Socket {
   if (!socket) {
-    socket = io(env.wsUrl, { transports: ['websocket'] });
+    // The gateway reads this token on connect to auto-join the socket to the
+    // organizer's user-scoped room, used for delivering personal notifications.
+    socket = io(env.wsUrl, {
+      transports: ['websocket'],
+      auth: { token: getStoredToken() },
+    });
   }
   return socket;
 }
