@@ -1,5 +1,5 @@
 import type { LucideIcon } from 'lucide-react';
-import { LayoutDashboard, CalendarDays } from 'lucide-react';
+import { LayoutDashboard, CalendarDays, Bell } from 'lucide-react';
 
 export interface SidebarLink {
   id: string;
@@ -20,5 +20,11 @@ export const sidebarLinks: SidebarLink[] = [
     label: 'Events',
     href: '/events',
     icon: CalendarDays,
+  },
+  {
+    id: 'notifications',
+    label: 'Notifications',
+    href: '/notifications',
+    icon: Bell,
   },
 ];
