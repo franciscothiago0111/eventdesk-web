@@ -1,28 +1,17 @@
 'use client';
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { toast } from 'sonner';
-import { Pencil, Plus, Trash2 } from 'lucide-react';
+import { Clock, Pencil, Plus, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Modal } from '@/components/ui/Modal';
 import { ConfirmModal } from '@/components/ui/ConfirmModal';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableEmpty,
-  TableHead,
-  TableHeadCell,
-  TableRow,
-  TableScrollArea,
-} from '@/components/ui/Table';
 import { ScheduleItem } from '@/shared/types/event';
 import {
-  scheduleItemFormSchema,
+  buildScheduleItemFormSchema,
   ScheduleItemFormValues,
 } from '../_schemas/schedule.schema';
 import {
@@ -34,13 +23,20 @@ import {
 interface ScheduleSectionProps {
   eventId: string;
   schedule: ScheduleItem[];
+  eventStartDate: string;
+  eventEndDate: string;
+}
+
+function formatDay(value: string) {
+  return new Intl.DateTimeFormat(undefined, {
+    weekday: 'short',
+    month: 'short',
+    day: 'numeric',
+  }).format(new Date(value));
 }
 
 function formatTime(value: string) {
-  return new Intl.DateTimeFormat(undefined, {
-    dateStyle: 'medium',
-    timeStyle: 'short',
-  }).format(new Date(value));
+  return new Intl.DateTimeFormat(undefined, { timeStyle: 'short' }).format(new Date(value));
 }
 
 function toDateTimeLocal(isoDate: string): string {
@@ -49,7 +45,12 @@ function toDateTimeLocal(isoDate: string): string {
   return new Date(date.getTime() - offsetMs).toISOString().slice(0, 16);
 }
 
-export function ScheduleSection({ eventId, schedule }: ScheduleSectionProps) {
+export function ScheduleSection({
+  eventId,
+  schedule,
+  eventStartDate,
+  eventEndDate,
+}: ScheduleSectionProps) {
   const [editingItem, setEditingItem] = useState<ScheduleItem | null | 'new'>(null);
   const [itemToDelete, setItemToDelete] = useState<string | null>(null);
 
@@ -59,6 +60,36 @@ export function ScheduleSection({ eventId, schedule }: ScheduleSectionProps) {
 
   const isModalOpen = editingItem !== null;
   const editingExisting = editingItem !== null && editingItem !== 'new' ? editingItem : null;
+
+  const minDateTimeLocal = toDateTimeLocal(eventStartDate);
+  const maxDateTimeLocal = toDateTimeLocal(eventEndDate);
+
+  const scheduleItemFormSchema = useMemo(
+    () => buildScheduleItemFormSchema(eventStartDate, eventEndDate),
+    [eventStartDate, eventEndDate],
+  );
+
+  const sortedSchedule = useMemo(
+    () =>
+      [...schedule].sort(
+        (a, b) => new Date(a.startTime).getTime() - new Date(b.startTime).getTime(),
+      ),
+    [schedule],
+  );
+
+  const groupedByDay = useMemo(() => {
+    const groups = new Map<string, ScheduleItem[]>();
+    for (const item of sortedSchedule) {
+      const key = new Date(item.startTime).toDateString();
+      const group = groups.get(key);
+      if (group) {
+        group.push(item);
+      } else {
+        groups.set(key, [item]);
+      }
+    }
+    return Array.from(groups.entries());
+  }, [sortedSchedule]);
 
   const {
     register,
@@ -122,28 +153,38 @@ export function ScheduleSection({ eventId, schedule }: ScheduleSectionProps) {
         </Button>
       </div>
 
-      <TableContainer>
-        <TableScrollArea>
-          <Table>
-            <TableHead>
-              <TableRow>
-                <TableHeadCell>Title</TableHeadCell>
-                <TableHeadCell>Starts</TableHeadCell>
-                <TableHeadCell>Ends</TableHeadCell>
-                <TableHeadCell>Actions</TableHeadCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {schedule.length === 0 ? (
-                <TableEmpty colSpan={4} message="No schedule items yet." />
-              ) : (
-                schedule.map((item) => (
-                  <TableRow key={item.id}>
-                    <TableCell>{item.title}</TableCell>
-                    <TableCell>{formatTime(item.startTime)}</TableCell>
-                    <TableCell>{formatTime(item.endTime)}</TableCell>
-                    <TableCell>
-                      <div className="flex gap-2">
+      {schedule.length === 0 ? (
+        <div className="rounded-lg border border-dashed border-neutral-300 p-6 text-center text-sm text-neutral-500">
+          No schedule items yet.
+        </div>
+      ) : (
+        <div className="flex flex-col gap-6">
+          {groupedByDay.map(([day, items]) => (
+            <div key={day} className="flex flex-col gap-3">
+              <span className="text-xs font-semibold uppercase tracking-wide text-neutral-500">
+                {formatDay(items[0].startTime)}
+              </span>
+              <ol className="flex flex-col gap-2 border-l-2 border-neutral-200 pl-4">
+                {items.map((item) => (
+                  <li
+                    key={item.id}
+                    className="relative rounded-lg border border-neutral-200 bg-white p-4 shadow-sm"
+                  >
+                    <span className="absolute -left-5.25 top-5 size-2.5 rounded-full bg-secondary-main" />
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="flex flex-col gap-1">
+                        <div className="flex items-center gap-2 text-xs font-medium text-neutral-500">
+                          <Clock className="size-3.5" />
+                          <span>
+                            {formatTime(item.startTime)} – {formatTime(item.endTime)}
+                          </span>
+                        </div>
+                        <p className="text-sm font-semibold text-neutral-950">{item.title}</p>
+                        {item.description && (
+                          <p className="text-sm text-neutral-500">{item.description}</p>
+                        )}
+                      </div>
+                      <div className="flex shrink-0 gap-2">
                         <button
                           type="button"
                           aria-label="Edit schedule item"
@@ -161,14 +202,14 @@ export function ScheduleSection({ eventId, schedule }: ScheduleSectionProps) {
                           <Trash2 className="size-4" />
                         </button>
                       </div>
-                    </TableCell>
-                  </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
-        </TableScrollArea>
-      </TableContainer>
+                    </div>
+                  </li>
+                ))}
+              </ol>
+            </div>
+          ))}
+        </div>
+      )}
 
       <Modal
         isOpen={isModalOpen}
@@ -201,12 +242,17 @@ export function ScheduleSection({ eventId, schedule }: ScheduleSectionProps) {
           <Input
             type="datetime-local"
             label="Start time"
+            hint={`Must be between ${formatDay(eventStartDate)} and ${formatDay(eventEndDate)}`}
+            min={minDateTimeLocal}
+            max={maxDateTimeLocal}
             error={errors.startTime?.message}
             {...register('startTime')}
           />
           <Input
             type="datetime-local"
             label="End time"
+            min={minDateTimeLocal}
+            max={maxDateTimeLocal}
             error={errors.endTime?.message}
             {...register('endTime')}
           />

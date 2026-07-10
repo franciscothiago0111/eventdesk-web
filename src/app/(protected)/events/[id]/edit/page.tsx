@@ -4,13 +4,12 @@ import { useParams, useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { PageHeader } from '@/components/PageHeader';
 import { PageHeaderGroup } from '@/components/PageHeaderGroup';
-import { BackButton } from '@/components/BackButton';
+import { Breadcrumb } from '@/components/Breadcrumb';
 import { LoadingState } from '@/components/LoadingState';
 import { ErrorState } from '@/components/ErrorState';
 import { EventForm } from '../../_components/event-form';
 import { useEvent, useUpdateEvent } from '../../_hooks/use-events';
 import { ImagesSection } from '../_components/images-section';
-import { ScheduleSection } from '../_components/schedule-section';
 
 export default function EditEventPage() {
   const { id } = useParams<{ id: string }>();
@@ -21,9 +20,16 @@ export default function EditEventPage() {
 
   return (
     <div className="flex flex-col gap-6 p-8">
+      <Breadcrumb
+        items={[
+          { label: 'Events', href: '/events' },
+          { label: event?.name ?? 'Event', href: event ? `/events/${id}` : undefined },
+          { label: 'Edit' },
+        ]}
+      />
+
       <PageHeaderGroup>
         <PageHeader title="Edit event" />
-        <BackButton text="Back" />
       </PageHeaderGroup>
 
       <LoadingState isLoading={isLoading}>
@@ -55,7 +61,6 @@ export default function EditEventPage() {
             />
 
             <ImagesSection eventId={id} images={event.images} />
-            <ScheduleSection eventId={id} schedule={event.schedule} />
           </div>
         )}
       </LoadingState>
