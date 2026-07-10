@@ -2,7 +2,7 @@
 
 Frontend for eventdesk — an organizer console for managing events, registrations, and live attendee check-in. Built with Next.js (App Router), TanStack Query, Zustand, React Hook Form + Zod, and Socket.io.
 
-Pairs with [eventdesk-api](../eventdesk-api) (NestJS). See [docs/frontend-plan.md](../docs/frontend-plan.md) and [docs/build-plan.md](../docs/build-plan.md) for the full design and execution log.
+Pairs with [eventdesk-api](https://github.com/franciscothiago0111/eventdesk-api) (NestJS).
 
 ## Live check-in dashboard
 
@@ -22,7 +22,7 @@ The dashboard updates in real time as attendees are checked in — no manual ref
 
 ### Prerequisites
 - Node.js + Yarn
-- [eventdesk-api](../eventdesk-api) running locally (see its README) — this app has no backend of its own
+- [eventdesk-api](https://github.com/franciscothiago0111/eventdesk-api) running locally (see its README) — this app has no backend of its own
 
 ### 1. Environment
 
@@ -43,7 +43,7 @@ Open [http://localhost:3000](http://localhost:3000). Unauthenticated visits redi
 
 ## Deployment
 
-Not yet deployed — `eventdesk-web` → Vercel, pointed at a deployed `eventdesk-api`, is tracked as a separate Phase 8 item in [docs/build-plan.md](../docs/build-plan.md). This section will link to the live instance once that lands.
+Not yet deployed — `eventdesk-web` → Vercel, pointed at a deployed `eventdesk-api`, is tracked as a separate Phase 8 item. This section will link to the live instance once that lands.
 
 ## Testing
 
