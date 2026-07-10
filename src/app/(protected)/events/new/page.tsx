@@ -4,7 +4,7 @@ import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { PageHeader } from '@/components/PageHeader';
 import { PageHeaderGroup } from '@/components/PageHeaderGroup';
-import { BackButton } from '@/components/BackButton';
+import { Breadcrumb } from '@/components/Breadcrumb';
 import { EventForm } from '../_components/event-form';
 import { useCreateEvent } from '../_hooks/use-events';
 
@@ -14,9 +14,15 @@ export default function NewEventPage() {
 
   return (
     <div className="flex flex-col gap-6 p-8">
+      <Breadcrumb
+        items={[
+          { label: 'Events', href: '/events' },
+          { label: 'New event' },
+        ]}
+      />
+
       <PageHeaderGroup>
         <PageHeader title="New event" />
-        <BackButton text="Back" />
       </PageHeaderGroup>
 
       <EventForm
