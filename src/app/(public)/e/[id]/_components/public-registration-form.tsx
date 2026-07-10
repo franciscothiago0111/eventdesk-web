@@ -1,10 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { toast } from 'sonner';
-import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { ApiError } from '@/core/api/api-error';
 import { Registration } from '@/shared/types/registration';
@@ -14,19 +13,27 @@ import {
   PublicRegistrationValues,
 } from '../_schemas/public-registration.schema';
 
+export const PUBLIC_REGISTRATION_FORM_ID = 'public-registration-form';
+
 interface PublicRegistrationFormProps {
   eventId: string;
   requiresPass: boolean;
   onRegistered: (registration: Registration) => void;
+  onPendingChange?: (isPending: boolean) => void;
 }
 
 export function PublicRegistrationForm({
   eventId,
   requiresPass,
   onRegistered,
+  onPendingChange,
 }: PublicRegistrationFormProps) {
   const [passError, setPassError] = useState<string | undefined>();
   const register_ = usePublicRegistration(eventId);
+
+  useEffect(() => {
+    onPendingChange?.(register_.isPending);
+  }, [register_.isPending, onPendingChange]);
 
   const {
     register,
@@ -67,9 +74,14 @@ export function PublicRegistrationForm({
 
   return (
     <form
+      id={PUBLIC_REGISTRATION_FORM_ID}
       onSubmit={handleSubmit(onSubmit)}
-      className="flex w-full max-w-sm flex-col gap-4"
+      className="flex w-full flex-col gap-4 py-1"
     >
+      <p className="text-sm text-slate-500">
+        You&apos;re one step away. Fill in your details below and we&apos;ll
+        send a check-in code to your email.
+      </p>
       <Input
         label="Full name"
         placeholder="Jane Doe"
@@ -92,9 +104,6 @@ export function PublicRegistrationForm({
           {...register('pass')}
         />
       )}
-      <Button type="submit" isLoading={register_.isPending} fullWidth>
-        Confirm registration
-      </Button>
     </form>
   );
 }
