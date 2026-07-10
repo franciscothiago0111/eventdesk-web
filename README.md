@@ -1,6 +1,6 @@
 # eventdesk-web
 
-Frontend for eventdesk — an organizer console for managing events, registrations, and live attendee check-in. Built with Next.js (App Router), TanStack Query, Zustand, React Hook Form + Zod, and Socket.io.
+Frontend for eventdesk — an organizer console for managing events, registrations, and live attendee check-in, plus a public event page for attendee self-registration. Built with Next.js (App Router), TanStack Query, Zustand, React Hook Form + Zod, and Socket.io.
 
 Pairs with [eventdesk-api](https://github.com/franciscothiago0111/eventdesk-api) (NestJS).
 
@@ -12,11 +12,14 @@ The dashboard updates in real time as attendees are checked in — no manual ref
 
 ## Features
 
-- **Auth** — register/login against `eventdesk-api`, session held in a Zustand store (`persist` to `localStorage`; see `src/core/lib/token-storage.ts` for the MVP tradeoffs of that choice)
-- **Events** — create, edit, publish, close, list, view detail (capacity + status)
+- **Auth** — register/login against `eventdesk-api`, session held in a Zustand store (`persist` to `localStorage`; see `src/core/services/token-storage.ts` for the MVP tradeoffs of that choice)
+- **Events** — create, edit, publish, close, list, view detail (capacity + status), gallery image uploads, per-event schedule
+- **Public event page** — unauthenticated `/e/[id]` page where attendees self-register for a published event, no login required
 - **Registrations** — list per event, CSV export, live check-in status badge
 - **Dashboard** — total events, active event capacity, live check-in count + trend chart
-- **Realtime** — Socket.io client joins a per-event room and merges incoming check-ins into the TanStack Query cache, deduped by check-in ID
+- **Notifications** — in-app notification list, fed by `eventdesk-api`'s `NotificationModule`
+- **PDF export** — event details exportable as PDF via `@react-pdf/renderer` (`src/core/pdf`)
+- **Realtime** — Socket.io client joins a per-event room and merges incoming check-ins (and registrations) into the TanStack Query cache, deduped by ID
 
 ## Getting started
 
@@ -56,25 +59,33 @@ yarn build
 
 ## Tech stack
 
-Next.js (App Router) · TypeScript · TanStack Query · Zustand · React Hook Form + Zod · Axios · Socket.io client · Tailwind · Recharts · Vitest + Testing Library · Playwright
+Next.js (App Router) · TypeScript · TanStack Query · Zustand · React Hook Form + Zod · Axios · Socket.io client · Tailwind · Radix UI · Recharts · `@react-pdf/renderer` · Vitest + Testing Library + MSW · Playwright
 
 ## Project structure
 
 ```
 src/
 ├── app/
-│   ├── (auth)/login/           public route group
-│   └── (protected)/            gated by ProtectedShell, redirects to /login without a session
+│   ├── (auth)/login/                       public route group
+│   ├── (public)/e/[id]/                     public route group — unauthenticated attendee self-registration page
+│   └── (protected)/                        gated by ProtectedShell, redirects to /login without a session
 │       ├── dashboard/
-│       └── events/[id]/registrations/
+│       ├── notifications/
+│       └── events/
+│           ├── new/                          create-event form
+│           └── [id]/                          detail: overview, registrations, schedule, image gallery
+│                   └── edit/
 ├── core/
 │   ├── api/                     axios instance, envelope-unwrapping interceptor
 │   ├── config/                  typed NEXT_PUBLIC_* env
-│   ├── hooks/                   use-auth (Zustand), use-csv-download
+│   ├── hooks/                   use-auth (Zustand), use-csv-download, use-pdf-download, use-notifications, use-persisted-filters
+│   ├── pdf/                     @react-pdf/renderer templates (event details export)
 │   ├── providers/                React Query provider + Toaster
-│   ├── realtime/                 socket-provider (module-level singleton), use-live-checkins
-│   └── services/                 auth.service
+│   ├── realtime/                 socket-provider (module-level singleton), use-live-checkins, use-live-registrations
+│   └── services/                 auth.service, notifications.service, token-storage
 ├── components/ui/               hand-rolled component set (Button, Table, Modal, etc.)
-└── shared/types/                types mirroring the API's presenters (event, registration, check-in)
+├── shared/
+│   ├── types/                     types mirroring the API's presenters (event, registration, check-in, notification, dashboard)
+│   └── utils/                     date, event-category, event-images helpers
+└── test/msw/                     MSW request handlers shared by Vitest tests
 ```
-# eventdesk-web
