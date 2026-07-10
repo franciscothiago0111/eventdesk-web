@@ -55,7 +55,7 @@ export default function EventDetailPage() {
                 <img
                   src={getImageByType(event.images, 'COVER')!.url}
                   alt=""
-                  className="h-40 w-full rounded-2xl object-cover"
+                  className="h-56 w-full rounded-2xl object-cover"
                 />
               )}
 
@@ -83,6 +83,20 @@ export default function EventDetailPage() {
                   <dd>{new Date(event.endDate).toLocaleString()}</dd>
                 </div>
               </dl>
+
+              {event.location && (
+                <div className="flex flex-col gap-2">
+                  <h2 className="text-sm font-semibold text-neutral-950">Location</h2>
+                  <p className="text-sm text-neutral-700">{event.location}</p>
+                  <iframe
+                    title="Event location"
+                    src={`https://www.google.com/maps?q=${encodeURIComponent(event.location)}&output=embed`}
+                    className="h-56 w-full rounded-2xl border border-neutral-200"
+                    loading="lazy"
+                    referrerPolicy="no-referrer-when-downgrade"
+                  />
+                </div>
+              )}
 
               <div className="flex flex-wrap gap-3">
                 {event.status === 'DRAFT' && (
